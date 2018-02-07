@@ -37,6 +37,7 @@ public class SignupActivity extends AppCompatActivity {
     @BindView(R.id.link_login) TextView loginLink;
 
     JSONParser jsonParser = new JSONParser();
+    // TODO: Replace ProgressDialog with ProgressBar
     private ProgressDialog progressDialog;
     // 10.0.2.2 is used instead of localhost to run on emulator
     private static final String URL_CREATE_USER = "http://10.0.2.2/gamefitter/create_user.php";
@@ -74,24 +75,7 @@ public class SignupActivity extends AppCompatActivity {
 
         signupButton.setEnabled(false);
 
-        // TODO: Implement your own signup logic here.
-
         new CreateNewUser().execute();
-/*
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onSignupSuccess or onSignupFailed
-                        // depending on success
-                        if (success == 1) {
-                            onSignupSuccess();
-                        } else {
-                            onSignupFailed();
-                        }
-
-                        progressDialog.dismiss();
-                    }
-                }, 3000);*/
     }
 
     public void onSignupSuccess() {
@@ -171,17 +155,22 @@ public class SignupActivity extends AppCompatActivity {
             String email = emailText.getText().toString();
             String password = passwordText.getText().toString();
 
+            /*
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("username", name));
             params.add(new BasicNameValuePair("email", email));
             params.add(new BasicNameValuePair("password", password));
-
-
-            JSONObject json = jsonParser.makeHttpRequest(URL_CREATE_USER , "POST", params);
-
-            Log.d("Create Response", json.toString());
+            */
+            HashMap<String, String> params = new HashMap<>();
+            params.put("username", name);
+            params.put("email", email);
+            params.put("password", password);
 
             try {
+                JSONObject json = jsonParser.makeHttpRequest(URL_CREATE_USER , "POST", params);
+
+                Log.d("Create Response", json.toString());
+
                 success = json.getInt(TAG_SUCCESS);
             } catch (JSONException e) {
                 e.printStackTrace();

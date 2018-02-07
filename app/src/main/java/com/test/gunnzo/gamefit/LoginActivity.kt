@@ -1,14 +1,24 @@
 package com.test.gunnzo.gamefit
 
 import android.app.Activity
-import android.app.ProgressDialog
+// TODO: Replace ProgressDialog with ProgressBar
+//import android.app.ProgressDialog
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.View
+import android.view.WindowManager
+import android.widget.ProgressBar
+import android.widget.RelativeLayout
 import kotlinx.android.synthetic.main.activity_login.*
 import android.widget.Toast
-
+import org.apache.http.NameValuePair
+import org.apache.http.message.BasicNameValuePair
+import org.json.JSONException
+import org.json.JSONObject
+import java.net.URL
 
 
 /**
@@ -17,6 +27,15 @@ import android.widget.Toast
 class LoginActivity : AppCompatActivity() {
     private val TAG = "LoginActivity"
     private val REQUEST_SIGNUP = 0;
+
+    internal var jsonParser = JSONParser()
+    //var progressDialog: ProgressDialog? = null
+    private var progressBar: ProgressBar? = null
+
+    // 10.0.2.2 is used instead of localhost to run on emulator
+    private val URL_CREATE_USER = "http://10.0.2.2/gamefitter/login.php"
+    private val TAG_SUCCESS = "success"
+    private var success = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,25 +71,7 @@ class LoginActivity : AppCompatActivity() {
 
         btn_login.setEnabled(false);
 
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Authenticating...");
-        progressDialog.show();
-
-        val email = input_email.getText().toString();
-        val password = input_password.getText().toString();
-
-        // TODO: Implement your own authentication logic here.
-
-        android.os.Handler().postDelayed(
-                Runnable {
-                    run() {
-                        // On complete call either onLoginSuccess or onLoginFailed
-                        onLoginSuccess();
-                        // onLoginFailed();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
+        UserLogin().execute()
     }
 
     fun onLoginSuccess() {
@@ -105,5 +106,61 @@ class LoginActivity : AppCompatActivity() {
         }
 
         return valid
+    }
+
+    inner class UserLogin : AsyncTask<String, String, String>() {
+        val layout: RelativeLayout = RelativeLayout(this@LoginActivity)
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+            progressBar?.visibility = View.GONE
+
+            if (success == 1) {
+                onLoginSuccess()
+            } else {
+                onLoginFailed()
+            }
+            //progressDialog.dismiss()
+        }
+
+        override fun doInBackground(vararg p0: String?): String {
+            val email = input_email.getText().toString()
+            val password = input_password.getText().toString()
+
+            Log.d("Entered email", email)
+
+            val params: HashMap<String, String> = HashMap()
+            params.put("email", email)
+            params.put("password", password)
+
+            try {
+                val json: JSONObject = jsonParser.makeHttpRequest(URL_CREATE_USER, "GET", params)
+
+                success = json.getInt(TAG_SUCCESS)
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            }
+
+            return email
+        }
+
+        override fun onPreExecute() {
+            super.onPreExecute()
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+
+            progressBar = ProgressBar(this@LoginActivity,null,R.attr.progressBarStyle)
+            var params: RelativeLayout.LayoutParams = RelativeLayout.LayoutParams(100,100)
+            params.addRule(RelativeLayout.CENTER_IN_PARENT)
+            layout.addView(progressBar,params)
+            progressBar?.visibility = View.VISIBLE
+
+            /*
+            progressDialog = ProgressDialog(this@LoginActivity)
+            progressDialog.setMessage("Authenticating...")
+            progressDialog.setIndeterminate(false)
+            progressDialog.setCancelable(true)
+            progressDialog.show()*/
+        }
     }
 }
