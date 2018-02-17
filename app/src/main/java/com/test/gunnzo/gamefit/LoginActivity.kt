@@ -1,8 +1,6 @@
 package com.test.gunnzo.gamefit
 
 import android.app.Activity
-// TODO: Replace ProgressDialog with ProgressBar
-//import android.app.ProgressDialog
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
@@ -14,8 +12,6 @@ import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import kotlinx.android.synthetic.main.activity_login.*
 import android.widget.Toast
-import org.apache.http.NameValuePair
-import org.apache.http.message.BasicNameValuePair
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URL
@@ -33,15 +29,20 @@ class LoginActivity : AppCompatActivity() {
     private var progressBar: ProgressBar? = null
 
     // 10.0.2.2 is used instead of localhost to run on emulator
-    private val URL_CREATE_USER = "http://10.0.2.2/gamefitter/login.php"
+    private val URL_LOGIN_USER = "http://10.0.2.2/gamefitter/login.php"; //"http://192.168.1.82:80/gamefitter/login.php";
     private val TAG_SUCCESS = "success"
     private var success = 0
+
+    private var resultIntent = Intent()
+    private val RESULT_DATA_KEY = "has_games_key"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
         btn_login.setOnClickListener{login();}
+
+        resultIntent = Intent(this, MainActivity::class.java)
 
         link_signup.setOnClickListener{
             val intent = Intent(this, SignupActivity::class.java)
@@ -56,6 +57,8 @@ class LoginActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if(requestCode == REQUEST_SIGNUP) {
             if (resultCode == Activity.RESULT_OK) {
+                resultIntent.putExtra(RESULT_DATA_KEY, false)
+                setResult(Activity.RESULT_OK, resultIntent)
                 this.finish()
             }
         }
@@ -121,7 +124,6 @@ class LoginActivity : AppCompatActivity() {
             } else {
                 onLoginFailed()
             }
-            //progressDialog.dismiss()
         }
 
         override fun doInBackground(vararg p0: String?): String {
@@ -134,13 +136,17 @@ class LoginActivity : AppCompatActivity() {
             params.put("email", email)
             params.put("password", password)
 
+            // TODO: implement the database functions and use it instead of setting success to 1
+            // TODO:
+            /*
             try {
-                val json: JSONObject = jsonParser.makeHttpRequest(URL_CREATE_USER, "GET", params)
+                val json: JSONObject = jsonParser.makeHttpRequest(URL_LOGIN_USER, "GET", params)
 
                 success = json.getInt(TAG_SUCCESS)
             } catch (e: JSONException) {
                 e.printStackTrace()
-            }
+            }*/
+            success = 1
 
             return email
         }
@@ -154,13 +160,6 @@ class LoginActivity : AppCompatActivity() {
             params.addRule(RelativeLayout.CENTER_IN_PARENT)
             layout.addView(progressBar,params)
             progressBar?.visibility = View.VISIBLE
-
-            /*
-            progressDialog = ProgressDialog(this@LoginActivity)
-            progressDialog.setMessage("Authenticating...")
-            progressDialog.setIndeterminate(false)
-            progressDialog.setCancelable(true)
-            progressDialog.show()*/
         }
     }
 }
