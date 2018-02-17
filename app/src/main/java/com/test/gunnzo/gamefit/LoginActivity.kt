@@ -29,15 +29,20 @@ class LoginActivity : AppCompatActivity() {
     private var progressBar: ProgressBar? = null
 
     // 10.0.2.2 is used instead of localhost to run on emulator
-    private val URL_CREATE_USER = "http://10.0.2.2/gamefitter/login.php"; //"http://192.168.1.82:80/gamefitter/login.php";
+    private val URL_LOGIN_USER = "http://10.0.2.2/gamefitter/login.php"; //"http://192.168.1.82:80/gamefitter/login.php";
     private val TAG_SUCCESS = "success"
     private var success = 0
+
+    private var resultIntent = Intent()
+    private val RESULT_DATA_KEY = "has_games_key"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
         btn_login.setOnClickListener{login();}
+
+        resultIntent = Intent(this, MainActivity::class.java)
 
         link_signup.setOnClickListener{
             val intent = Intent(this, SignupActivity::class.java)
@@ -52,6 +57,8 @@ class LoginActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if(requestCode == REQUEST_SIGNUP) {
             if (resultCode == Activity.RESULT_OK) {
+                resultIntent.putExtra(RESULT_DATA_KEY, false)
+                setResult(Activity.RESULT_OK, resultIntent)
                 this.finish()
             }
         }
@@ -129,13 +136,17 @@ class LoginActivity : AppCompatActivity() {
             params.put("email", email)
             params.put("password", password)
 
+            // TODO: implement the database functions and use it instead of setting success to 1
+            // TODO:
+            /*
             try {
-                val json: JSONObject = jsonParser.makeHttpRequest(URL_CREATE_USER, "GET", params)
+                val json: JSONObject = jsonParser.makeHttpRequest(URL_LOGIN_USER, "GET", params)
 
                 success = json.getInt(TAG_SUCCESS)
             } catch (e: JSONException) {
                 e.printStackTrace()
-            }
+            }*/
+            success = 1
 
             return email
         }

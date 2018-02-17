@@ -1,5 +1,6 @@
 package com.test.gunnzo.gamefit;
 
+import android.support.annotation.NonNull;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.os.AsyncTask;
@@ -12,6 +13,12 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,11 +48,15 @@ public class SignupActivity extends AppCompatActivity {
     private static final String TAG_SUCCESS = "success";
     private static int success = 0;
 
+    private FirebaseAuth mAuth;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
         ButterKnife.bind(this);
+
+        mAuth = FirebaseAuth.getInstance();
 
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,7 +83,9 @@ public class SignupActivity extends AppCompatActivity {
 
         signupButton.setEnabled(false);
 
-        new CreateNewUser().execute();
+        createNewUser((String)emailText.getText().toString(), (String)passwordText.getText().toString());
+        //new CreateNewUser().execute();
+
     }
 
     public void onSignupSuccess() {
@@ -82,7 +95,7 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     public void onSignupFailed() {
-        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
 
         signupButton.setEnabled(true);
     }
@@ -118,12 +131,36 @@ public class SignupActivity extends AppCompatActivity {
         return valid;
     }
 
-    class CreateNewUser extends AsyncTask<String, String, String> {
-        RelativeLayout layout = new RelativeLayout(SignupActivity.this);
+    public void createNewUser(String email, String password) {
+
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "createUserWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            onSignupSuccess();
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                            Toast.makeText(SignupActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                            onSignupFailed();
+                        }
+                    }
+                });
+    }
+    /*
+    static class CreateNewUser extends AsyncTask<String, String, String> {
+        //RelativeLayout layout = new RelativeLayout(SignupActivity.this);
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            // TODO: Create progress bar
+
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
             progressBar = new ProgressBar(SignupActivity.this,null,android.R.attr.progressBarStyleLarge);
@@ -131,12 +168,14 @@ public class SignupActivity extends AppCompatActivity {
             params.addRule(RelativeLayout.CENTER_IN_PARENT);
             layout.addView(progressBar,params);
             progressBar.setVisibility(View.VISIBLE);
+
         }
 
         @Override
         protected void onPostExecute(String s) {
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-            progressBar.setVisibility(View.GONE);
+            // TODO: Turn off progress bar
+            //getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            //progressBar.setVisibility(View.GONE);
 
             if (success == 1) {
                 onSignupSuccess();
@@ -168,5 +207,5 @@ public class SignupActivity extends AppCompatActivity {
 
             return null;
         }
-    }
+    }*/
 }
