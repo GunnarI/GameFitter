@@ -19,5 +19,8 @@
     <string name="create_game_button">create new game</string>
     <string name="join_game_button">join new game</string>
 
+    <string name="no_games">No existing games</string>
+    <string name="some_games">Some existing games</string>
+
     <string name="web_client_id">977777569614-f6qbsej2l01urcv3a8ksqjusng7e8vbd.apps.googleusercontent.com</string>
 </resources>

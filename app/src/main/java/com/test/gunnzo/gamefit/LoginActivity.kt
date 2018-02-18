@@ -1,16 +1,10 @@
 package com.test.gunnzo.gamefit
 
 import android.app.Activity
-import android.app.ProgressDialog
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.View
-import android.view.WindowManager
-import android.widget.ProgressBar
-import android.widget.RelativeLayout
 import kotlinx.android.synthetic.main.activity_login.*
 import android.widget.Toast
 
@@ -20,15 +14,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider;
-//import jdk.nashorn.internal.runtime.ECMAException.getException
-import com.google.firebase.auth.FirebaseUser
-//import org.junit.experimental.results.ResultMatchers.isSuccessful
-import com.google.firebase.auth.AuthResult
-import com.google.android.gms.tasks.Task
-import android.support.annotation.NonNull
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.auth.AuthCredential
 
 
 
@@ -39,15 +25,6 @@ import com.google.firebase.auth.AuthCredential
 class LoginActivity : AppCompatActivity() {
     private val TAG = "LoginActivity"
     private val REQUEST_SIGNUP = 0;
-
-    internal var jsonParser = JSONParser()
-    //var progressDialog: ProgressDialog? = null
-    private var progressBar: ProgressBar? = null
-
-    // 10.0.2.2 is used instead of localhost to run on emulator
-    private val URL_LOGIN_USER = "http://10.0.2.2/gamefitter/login.php"; //"http://192.168.1.82:80/gamefitter/login.php";
-    private val TAG_SUCCESS = "success"
-    private var success = 0
 
     private var resultIntent = Intent()
     private val RESULT_DATA_KEY = "has_games_key"
@@ -208,57 +185,4 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
     }
-
-    /*
-    inner class UserLogin : AsyncTask<String, String, String>() {
-        val layout: RelativeLayout = RelativeLayout(this@LoginActivity)
-
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
-            progressBar?.visibility = View.GONE
-
-            if (success == 1) {
-                onLoginSuccess()
-            } else {
-                onLoginFailed()
-            }
-        }
-
-        override fun doInBackground(vararg p0: String?): String {
-            val email = input_email.getText().toString()
-            val password = input_password.getText().toString()
-
-            Log.d("Entered email", email)
-
-            val params: HashMap<String, String> = HashMap()
-            params.put("email", email)
-            params.put("password", password)
-
-            // TODO: implement the database functions and use it instead of setting success to 1
-            // TODO:
-            /*
-            try {
-                val json: JSONObject = jsonParser.makeHttpRequest(URL_LOGIN_USER, "GET", params)
-
-                success = json.getInt(TAG_SUCCESS)
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }*/
-            success = 1
-
-            return email
-        }
-
-        override fun onPreExecute() {
-            super.onPreExecute()
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
-
-            progressBar = ProgressBar(this@LoginActivity,null,R.attr.progressBarStyle)
-            var params: RelativeLayout.LayoutParams = RelativeLayout.LayoutParams(100,100)
-            params.addRule(RelativeLayout.CENTER_IN_PARENT)
-            layout.addView(progressBar,params)
-            progressBar?.visibility = View.VISIBLE
-        }
-    }*/
 }

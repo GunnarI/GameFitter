@@ -17,6 +17,21 @@
         </activity>
         <activity android:name=".LoginActivity" android:theme="@style/AppTheme.Dark" />
         <activity android:name=".SignupActivity" android:theme="@style/AppTheme.Dark" />
+        <activity android:name=".WelcomeActivity" android:theme="@style/AppTheme.Dark" />
+        <activity
+            android:name=".GamesActivity"
+            android:parentActivityName=".WelcomeActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.test.gunnzo.gamefit.WelcomeActivity" />
+        </activity>
+        <activity
+            android:name=".NewGameActivity"
+            android:parentActivityName=".GamesActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.test.gunnzo.gamefit.NewGameActivity" />
+        </activity>
     </application>
 
 </manifest>

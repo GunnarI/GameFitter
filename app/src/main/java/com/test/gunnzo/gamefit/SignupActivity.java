@@ -1,16 +1,12 @@
 package com.test.gunnzo.gamefit;
 
 import android.support.annotation.NonNull;
-import android.view.WindowManager;
-import android.widget.ProgressBar;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,14 +15,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
 
 import butterknife.ButterKnife;
 import butterknife.BindView;
@@ -45,9 +35,6 @@ public class SignupActivity extends AppCompatActivity {
     @BindView(R.id.link_login) TextView loginLink;
 
     JSONParser jsonParser = new JSONParser();
-    private ProgressBar progressBar;
-    // 10.0.2.2 is used instead of localhost to run on emulator
-    private static final String URL_CREATE_USER = "http://10.0.2.2/gamefitter/create_user.php"; //"http://192.168.1.82:80/gamefitter/create_user.php";
     private static final String TAG_SUCCESS = "success";
     private static int success = 0;
 
@@ -88,9 +75,9 @@ public class SignupActivity extends AppCompatActivity {
 
         signupButton.setEnabled(false);
 
-        createNewUser((String)emailText.getText().toString(), (String)passwordText.getText().toString());
-        //new CreateNewUser().execute();
-
+        createNewUser(nameText.getText().toString(),
+                emailText.getText().toString(),
+                passwordText.getText().toString());
     }
 
     public void onSignupSuccess() {
@@ -137,7 +124,7 @@ public class SignupActivity extends AppCompatActivity {
         return valid;
     }
 
-    public void createNewUser(String email, String password) {
+    public void createNewUser(final String username, String email, String password) {
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -148,12 +135,17 @@ public class SignupActivity extends AppCompatActivity {
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null) {
+                                UserData userData = new UserData(
+                                        username, user.getEmail(), 0);
+                                //userData.setNrGames(0);
+                                dbRef.child("users").child(user.getUid()).setValue(userData);
+                                /*
                                 dbRef.child("users")
                                         .child(user.getUid())
                                         .child("email").setValue(user.getEmail());
                                 dbRef.child("users")
                                         .child(user.getUid())
-                                        .child("username").setValue(user.getDisplayName());
+                                        .child("username").setValue(user.getDisplayName());*/
                             }
 
                             onSignupSuccess();
@@ -167,62 +159,4 @@ public class SignupActivity extends AppCompatActivity {
                     }
                 });
     }
-
-
-    /*
-    static class CreateNewUser extends AsyncTask<String, String, String> {
-        //RelativeLayout layout = new RelativeLayout(SignupActivity.this);
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // TODO: Create progress bar
-
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-
-            progressBar = new ProgressBar(SignupActivity.this,null,android.R.attr.progressBarStyleLarge);
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100,100);
-            params.addRule(RelativeLayout.CENTER_IN_PARENT);
-            layout.addView(progressBar,params);
-            progressBar.setVisibility(View.VISIBLE);
-
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            // TODO: Turn off progress bar
-            //getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-            //progressBar.setVisibility(View.GONE);
-
-            if (success == 1) {
-                onSignupSuccess();
-            } else {
-                onSignupFailed();
-            }
-        }
-
-        @Override
-        protected String doInBackground(String... strings) {
-            String name = nameText.getText().toString();
-            String email = emailText.getText().toString();
-            String password = passwordText.getText().toString();
-
-            HashMap<String, String> params = new HashMap<>();
-            params.put("username", name);
-            params.put("email", email);
-            params.put("password", password);
-
-            try {
-                JSONObject json = jsonParser.makeHttpRequest(URL_CREATE_USER , "POST", params);
-
-                Log.d("Create Response", json.toString());
-
-                success = json.getInt(TAG_SUCCESS);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-    }*/
 }
