@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 /**
  * Created by Gunnar on 16.2.2018.
@@ -17,6 +19,8 @@ public class MainActivity extends AppCompatActivity {
     static final String RESULT_DATA_KEY = "has_games_key";
 
     private FirebaseAuth mAuth;
+    //private FirebaseDatabase db = FirebaseDatabase.getInstance();
+    private DatabaseReference dbRef;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -31,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
         updateUI(currentUser);
@@ -51,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent, USER_INFO_REQUEST);
         } else {
             // TODO: Go to either welcome screen or games screen depending on if the user has any existing games or not
+
         }
     }
 }

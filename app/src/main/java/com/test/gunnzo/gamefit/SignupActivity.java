@@ -19,6 +19,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,6 +52,7 @@ public class SignupActivity extends AppCompatActivity {
     private static int success = 0;
 
     private FirebaseAuth mAuth;
+    private DatabaseReference dbRef;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,6 +61,7 @@ public class SignupActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         mAuth = FirebaseAuth.getInstance();
+        dbRef = FirebaseDatabase.getInstance().getReference();
 
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,6 +95,7 @@ public class SignupActivity extends AppCompatActivity {
 
     public void onSignupSuccess() {
         signupButton.setEnabled(true);
+
         setResult(RESULT_OK, null);
         finish();
     }
@@ -141,6 +147,15 @@ public class SignupActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+                            if (user != null) {
+                                dbRef.child("users")
+                                        .child(user.getUid())
+                                        .child("email").setValue(user.getEmail());
+                                dbRef.child("users")
+                                        .child(user.getUid())
+                                        .child("username").setValue(user.getDisplayName());
+                            }
+
                             onSignupSuccess();
                         } else {
                             // If sign in fails, display a message to the user.
@@ -152,6 +167,8 @@ public class SignupActivity extends AppCompatActivity {
                     }
                 });
     }
+
+
     /*
     static class CreateNewUser extends AsyncTask<String, String, String> {
         //RelativeLayout layout = new RelativeLayout(SignupActivity.this);
