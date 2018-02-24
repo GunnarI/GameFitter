@@ -3,10 +3,12 @@ package com.test.gunnzo.gamefit;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-import android.widget.TextView;
+import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -15,6 +17,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.test.gunnzo.gamefit.dataclasses.UserData;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -23,16 +26,16 @@ import butterknife.ButterKnife;
  * Created by Gunnar on 16.2.2018.
  */
 
-public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "MainActivity";
+public class MainActivity extends FragmentActivity implements OnNewGameRequest {
+    private static final String TAG = MainActivity.class.getSimpleName();
 
-    @BindView(R.id.main_view_text) TextView mainViewText;
+    @BindView(R.id.main_fragment_container) View fragmentContainer;
 
     static final int USER_INFO_REQUEST = 1;
-    static final int WELCOME_ACTIVITY_REQUEST_CODE = 11;
-    static final String RESULT_DATA_KEY = "has_games_key";
+    static final String DIALOG_FRAG_TAG = "dialog";
 
-    private static final String USER_DATA_EXTRA = "UserData";
+    static final int CREATE_NEW_GAME_ID = 101;
+    static final int JOIN_NEW_GAME_ID = 102;
 
     private FirebaseAuth mAuth;
     private DatabaseReference dbRef;
@@ -46,10 +49,19 @@ public class MainActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        if (fragmentContainer != null) {
+            if (savedInstanceState != null) {
+                return;
+            }
+
+            NewGameFragment newGameFragment = new NewGameFragment();
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.main_fragment_container, newGameFragment).commit();
+        }
+
         mAuth = FirebaseAuth.getInstance();
-        dbRef = FirebaseDatabase.getInstance().getReference();
-        //Intent intent = new Intent(this, LoginActivity.class);
-        //startActivityForResult(intent, USER_INFO_REQUEST);
+        dbRef = FirebaseDatabase.getInstance().getReference("users");
     }
 
     @Override
@@ -61,27 +73,28 @@ public class MainActivity extends AppCompatActivity {
         updateUI(currentUser);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == USER_INFO_REQUEST) {
-            if (resultCode == RESULT_OK) {
-                boolean hasGames = data.getBooleanExtra(RESULT_DATA_KEY, false);
-            }
-        }
-    }
-
-    public void updateUI(FirebaseUser currentUser) {
+    public void updateUI(final FirebaseUser currentUser) {
         if (currentUser == null) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivityForResult(intent, USER_INFO_REQUEST);
         } else {
-            // TODO: Go to either welcome screen or games screen depending on if the user has any existing games or not
-            FirebaseUser user = mAuth.getCurrentUser();
-
-            dbRef.addValueEventListener(new ValueEventListener() {
+            dbRef.child(currentUser.getUid())
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
+
                     userData = dataSnapshot.getValue(UserData.class);
+
+                    if (userData.getNrGames() == 0) {
+                        // TODO: Start NewGameFragment with the data that it needs
+                    } else {
+                        // TODO: Start GamesFragment with the data that it needs
+                        GamesFragment gamesFragment = new GamesFragment();
+                        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                        transaction.replace(R.id.main_fragment_container, gamesFragment);
+                        transaction.commit();
+                        Log.i(TAG, "Some games");
+                    }
                 }
 
                 @Override
@@ -90,19 +103,24 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            if (userData.getNrGames() == 0) {
-                // TODO: Text the intent function
-                Intent intent = new Intent(this, WelcomeActivity.class);
-                Bundle extras = new Bundle();
-                extras.putParcelable(USER_DATA_EXTRA, userData);
-                intent.putExtras(extras);
-                startActivityForResult(intent, WELCOME_ACTIVITY_REQUEST_CODE);
-                mainViewText.setText(R.string.no_games);
-                Log.i(TAG, "No games");
-            } else {
-                mainViewText.setText(R.string.some_games);
-                Log.i(TAG, "Some games");
+
+        }
+    }
+
+    @Override
+    public void onOptionSelected(int optionId) {
+        if (optionId == CREATE_NEW_GAME_ID) {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            Fragment prev = getSupportFragmentManager().findFragmentByTag(DIALOG_FRAG_TAG);
+            if (prev != null) {
+                ft.remove(prev);
             }
+            ft.addToBackStack(null);
+
+            DialogFragment createGameFragment = new CreateGameDialog();
+            createGameFragment.show(ft, DIALOG_FRAG_TAG);
+        } else if (optionId == JOIN_NEW_GAME_ID) {
+            // TODO: Start join new game dialog
         }
     }
 }

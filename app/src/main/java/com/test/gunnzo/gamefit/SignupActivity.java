@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.test.gunnzo.gamefit.dataclasses.UserData;
 
 import butterknife.ButterKnife;
 import butterknife.BindView;
@@ -33,6 +35,7 @@ public class SignupActivity extends AppCompatActivity {
     @BindView(R.id.input_password) EditText passwordText;
     @BindView(R.id.btn_signup) Button signupButton;
     @BindView(R.id.link_login) TextView loginLink;
+    @BindView(R.id.pb_signup) ProgressBar progressBar;
 
     JSONParser jsonParser = new JSONParser();
     private static final String TAG_SUCCESS = "success";
@@ -93,6 +96,7 @@ public class SignupActivity extends AppCompatActivity {
         signupButton.setEnabled(true);
     }
 
+    // TODO: Change validation of signup fields
     public boolean validate() {
         boolean valid = true;
 
@@ -126,6 +130,8 @@ public class SignupActivity extends AppCompatActivity {
 
     public void createNewUser(final String username, String email, String password) {
 
+        progressBar.setVisibility(View.VISIBLE);
+
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -156,6 +162,8 @@ public class SignupActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT).show();
                             onSignupFailed();
                         }
+
+                        progressBar.setVisibility(View.INVISIBLE);
                     }
                 });
     }

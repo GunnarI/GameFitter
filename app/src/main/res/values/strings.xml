@@ -22,5 +22,15 @@
     <string name="no_games">No existing games</string>
     <string name="some_games">Some existing games</string>
 
+    <!-- Creating new game dialog -->
+    <string name="create_game_title">Create Game</string>
+    <string name="new_game_name">Game Name (eg. Club Awesome)</string>
+    <string name="new_game_type">Game Type (eg. Football)</string>
+    <string name="create_game_cancel">Cancel</string>
+    <string name="create_game_finish">Create</string>
+
+    <!-- Fragment interaction error message -->
+    <string name="frag_listener_exception">must implement OnFragmentInteractionListener</string>
+
     <string name="web_client_id">977777569614-f6qbsej2l01urcv3a8ksqjusng7e8vbd.apps.googleusercontent.com</string>
 </resources>

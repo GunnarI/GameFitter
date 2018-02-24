@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.View
+import android.widget.ProgressBar
 import kotlinx.android.synthetic.main.activity_login.*
 import android.widget.Toast
 
@@ -15,8 +17,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.android.gms.common.api.ApiException
-
-
+import java.util.*
 
 
 /**
@@ -32,11 +33,13 @@ class LoginActivity : AppCompatActivity() {
     private var mAuth: FirebaseAuth? = null
     private var mGoogleSignInClient: GoogleSignInClient? = null
     private val GOOGLE_SIGN_IN = 9001
+    private var progressBar: ProgressBar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        progressBar = this.pb_login
         mAuth = FirebaseAuth.getInstance()
 
         // TODO: Fix google login
@@ -90,10 +93,9 @@ class LoginActivity : AppCompatActivity() {
 
     private fun firebaseAuthWithGoogle(acct: GoogleSignInAccount) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.id!!)
-        // [START_EXCLUDE silent]
-        // showProgressDialog()
-        // [END_EXCLUDE]
-        // TODO: Show progress dialog
+
+        // TODO: Test progressBar ?
+        progressBar?.visibility = View.VISIBLE
 
         val credential = GoogleAuthProvider.getCredential(acct.idToken, null)
         mAuth!!.signInWithCredential(credential)
@@ -110,10 +112,7 @@ class LoginActivity : AppCompatActivity() {
                         onLoginFailed()
                     }
 
-                    // [START_EXCLUDE]
-                    // hideProgressDialog()
-                    // [END_EXCLUDE]
-                    // TODO: Hide pogress dialog
+                    progressBar?.visibility = View.INVISIBLE
                 }
     }
 
@@ -147,6 +146,7 @@ class LoginActivity : AppCompatActivity() {
         btn_login.setEnabled(true)
     }
 
+    // TODO: Change validation of login fields
     fun validate(): Boolean {
         var valid = true
 
@@ -171,8 +171,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     fun userLogin(email:String, password:String) {
-
-        mAuth!!.signInWithEmailAndPassword(email!!, password!!)
+        mAuth!!.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) {task ->
                     if (task.isSuccessful) {
                         Log.d(TAG, "signInWithEmail:success")

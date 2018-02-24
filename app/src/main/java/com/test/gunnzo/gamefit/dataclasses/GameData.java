@@ -1,4 +1,4 @@
-package com.test.gunnzo.gamefit;
+package com.test.gunnzo.gamefit.dataclasses;
 
 /**
  * Created by Gunnar on 18.2.2018.
