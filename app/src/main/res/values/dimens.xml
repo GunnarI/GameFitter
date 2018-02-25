@@ -7,6 +7,7 @@
     <dimen name="pb_height">100dp</dimen>
 
     <!-- Welcome screen dimensions-->
+    <dimen name="starting_margin">100dp</dimen>
     <dimen name="large_button_width">256dp</dimen>
     <dimen name="upper_button_margin">64dp</dimen>
     <dimen name="button_separation">16dp</dimen>

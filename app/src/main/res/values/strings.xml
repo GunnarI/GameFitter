@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE resources [
-    <!ENTITY appname "GameFitter">
+    <!ENTITY appname "TeamApp">
     <!ENTITY author "Gunnar Friðriksson">
     ]>
 
@@ -15,7 +15,7 @@
     <string name="member_button">Already a member? Login</string>
 
     <!-- The welcome screen -->
-    <string name="welcome_message">Welcome to &appname;</string>
+    <string name="welcome_message">Welcome to &appname;!</string>
     <string name="create_game_button">create new game</string>
     <string name="join_game_button">join new game</string>
 

@@ -9,14 +9,14 @@
 
     <fragment
         android:name="com.test.gunnzo.gamefit.NewGameFragment"
-        android:id="@+id/add_game_fragment"
+        android:id="@+id/add_game_fragment_large"
         android:layout_weight="1"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
     <fragment
         android:name="com.test.gunnzo.gamefit.GamesFragment"
-        android:id="@+id/games_fragment"
+        android:id="@+id/games_fragment_large"
         android:layout_weight="2"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

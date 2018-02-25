@@ -18,7 +18,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.test.gunnzo.gamefit.backend.JSONParser;
 import com.test.gunnzo.gamefit.dataclasses.UserData;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
 
 import butterknife.ButterKnife;
 import butterknife.BindView;
@@ -142,16 +147,8 @@ public class SignupActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null) {
                                 UserData userData = new UserData(
-                                        username, user.getEmail(), 0);
-                                //userData.setNrGames(0);
+                                        username, user.getEmail());
                                 dbRef.child("users").child(user.getUid()).setValue(userData);
-                                /*
-                                dbRef.child("users")
-                                        .child(user.getUid())
-                                        .child("email").setValue(user.getEmail());
-                                dbRef.child("users")
-                                        .child(user.getUid())
-                                        .child("username").setValue(user.getDisplayName());*/
                             }
 
                             onSignupSuccess();

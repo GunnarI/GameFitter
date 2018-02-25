@@ -1,6 +1,11 @@
-package com.test.gunnzo.gamefit;
+package com.test.gunnzo.gamefit.backend;
 
 import android.util.Log;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.gson.Gson;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedInputStream;
@@ -28,9 +33,10 @@ public class JSONParser {
     StringBuilder sbParams;
     String paramsString;
 
-    public JSONObject makeHttpRequest(String url, String method,
-                                      HashMap<String, String> params) {
+    public JSONObject makeHttpRequest(String url, String method, Object pojo) {
+                                      //HashMap<String, Object> params) {
 
+        /*
         sbParams = new StringBuilder();
         int i = 0;
         for (String key : params.keySet()) {
@@ -45,10 +51,15 @@ public class JSONParser {
                 e.printStackTrace();
             }
             i++;
-        }
+        }*/
 
         if (method.equals("POST")) {
             // request method is POST
+
+            Gson gson = new Gson();
+            String json = gson.toJson(pojo);
+            Log.i("JSONParser", json);
+
             try {
                 urlObj = new URL(url);
 
@@ -65,10 +76,11 @@ public class JSONParser {
 
                 conn.connect();
 
-                paramsString = sbParams.toString();
+                //paramsString = sbParams.toString();
+
 
                 wr = new DataOutputStream(conn.getOutputStream());
-                wr.writeBytes(paramsString);
+                wr.writeBytes(json);
                 wr.flush();
                 wr.close();
 
