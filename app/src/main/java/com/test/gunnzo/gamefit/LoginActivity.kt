@@ -83,9 +83,6 @@ class LoginActivity : AppCompatActivity() {
             } catch (e: ApiException) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e);
-                // [START_EXCLUDE]
-                // updateUI(null);
-                // [END_EXCLUDE]
                 onLoginFailed()
             }
         }
@@ -108,7 +105,6 @@ class LoginActivity : AppCompatActivity() {
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithCredential:failure", task.exception)
-                        //Snackbar.make(findViewById(R.id.main_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT).show()
                         onLoginFailed()
                     }
 
@@ -124,15 +120,17 @@ class LoginActivity : AppCompatActivity() {
     fun login() {
         Log.d(TAG, "Login");
 
-        if (!validate()) {
+        val email = input_email.getText().toString()
+        val password = input_password.getText().toString()
+
+        if (!isValidEmail(email) || !isValidPassword(password)) {
             onLoginFailed();
             return;
         }
 
         btn_login.setEnabled(false);
 
-        userLogin(input_email.getText().toString(), input_password.getText().toString())
-        //UserLogin().execute()
+        userLogin(email, password)
     }
 
     fun onLoginSuccess() {
@@ -141,33 +139,33 @@ class LoginActivity : AppCompatActivity() {
     }
 
     fun onLoginFailed() {
-        //Toast.makeText(baseContext, "Login failed", Toast.LENGTH_LONG).show()
-
         btn_login.setEnabled(true)
     }
 
-    // TODO: Change validation of login fields
-    fun validate(): Boolean {
-        var valid = true
-
-        val email = input_email.getText().toString()
-        val password = input_password.getText().toString()
+    fun isValidEmail(email: String): Boolean {
+        var emailValid = true
 
         if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            input_email.setError("enter a valid email address")
-            valid = false
+            input_email.setError("Not a valid email address")
+            emailValid = false
         } else {
             input_email.setError(null)
         }
 
-        if (password.isEmpty() || password.length < 4 || password.length > 10) {
-            input_password.setError("between 4 and 10 alphanumeric characters")
-            valid = false
+        return emailValid
+    }
+
+    fun isValidPassword(password: String): Boolean {
+        var passwordValid = true
+
+        if (password.isEmpty()) {
+            input_password.setError("Please enter the password")
+            passwordValid = false
         } else {
             input_password.setError(null)
         }
 
-        return valid
+        return passwordValid
     }
 
     fun userLogin(email:String, password:String) {
@@ -180,6 +178,9 @@ class LoginActivity : AppCompatActivity() {
                         Log.w(TAG, "signInWithEmail:failure", task.exception)
                         Toast.makeText(this@LoginActivity, "Authentication failed.",
                                 Toast.LENGTH_SHORT).show()
+
+                        input_email.setError("Incorrect email and/or password");
+                        input_password.setError("Incorrect email and/or password");
                         onLoginFailed()
                     }
                 }

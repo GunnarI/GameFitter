@@ -11,5 +11,4 @@ public class MainActivityTest {
     @Test
     public void updateUI() throws Exception {
     }
-
 }

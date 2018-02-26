@@ -2,6 +2,7 @@ package com.test.gunnzo.gamefit;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -37,7 +38,7 @@ import butterknife.ButterKnife;
  */
 
 public class MainActivity extends AppCompatActivity
-        implements OnNewGameRequest, CreateGameDialog.OnCreateGame {
+        implements OnNewGameRequest, CreateGameDialog.OnCreateGame, JoinGameDialog.OnJoinGame {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     @BindView(R.id.main_fragment_container) View fragmentContainer;
@@ -246,6 +247,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onOptionSelected(int optionId) {
         if (optionId == CREATE_NEW_GAME_ID) {
+
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             Fragment prev = getSupportFragmentManager().findFragmentByTag(DIALOG_FRAG_TAG);
             if (prev != null) {
@@ -256,7 +258,15 @@ public class MainActivity extends AppCompatActivity
             DialogFragment createGameFragment = new CreateGameDialog();
             createGameFragment.show(ft, DIALOG_FRAG_TAG);
         } else if (optionId == JOIN_NEW_GAME_ID) {
-            // TODO: Start join new game dialog
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            Fragment prev = getSupportFragmentManager().findFragmentByTag(DIALOG_FRAG_TAG);
+            if (prev != null) {
+                ft.remove(prev);
+            }
+            ft.addToBackStack(null);
+
+            DialogFragment joinGameFragment = new JoinGameDialog();
+            joinGameFragment.show(ft, DIALOG_FRAG_TAG);
         }
     }
 
@@ -282,5 +292,33 @@ public class MainActivity extends AppCompatActivity
             Log.w(TAG, e);
         }
 
+    }
+
+    @Override
+    public void joinGame(final String gameId) {
+        // TODO: Let user now if id is incorrect
+        try {
+            DatabaseReference gamesRef = dbRef.child("games");
+            gamesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.child(gameId).exists()) {
+                        DatabaseReference usersRef = dbRef.child("users");
+
+                        Map<String, Object> gamesIdsUpdate = new HashMap<>();
+                        gamesIdsUpdate.put(dataSnapshot.getKey(), true);
+                        usersRef.child(mAuth.getUid())
+                                .child("gamesIds").updateChildren(gamesIdsUpdate);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        } catch (DatabaseException e) {
+            Log.w(TAG, e);
+        }
     }
 }
