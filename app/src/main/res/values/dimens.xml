@@ -15,4 +15,10 @@
     <!-- Creating new game dialog -->
     <dimen name="top_margin">16dp</dimen>
     <dimen name="left_right_margin">8dp</dimen>
+
+    <!-- Games screen dimensions -->
+    <dimen name="large_button_margin">16dp</dimen>
+    <dimen name="small_button_margin">24dp</dimen>
+    <dimen name="cg_button_offset">65dp</dimen>
+    <dimen name="jg_button_offset">120dp</dimen>
 </resources>
