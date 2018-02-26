@@ -1,16 +1,13 @@
 package com.test.gunnzo.gamefit;
 
 import android.support.annotation.NonNull;
-import android.view.WindowManager;
-import android.widget.ProgressBar;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,8 +16,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.test.gunnzo.gamefit.backend.JSONParser;
+import com.test.gunnzo.gamefit.dataclasses.UserData;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -40,15 +40,14 @@ public class SignupActivity extends AppCompatActivity {
     @BindView(R.id.input_password) EditText passwordText;
     @BindView(R.id.btn_signup) Button signupButton;
     @BindView(R.id.link_login) TextView loginLink;
+    @BindView(R.id.pb_signup) ProgressBar progressBar;
 
     JSONParser jsonParser = new JSONParser();
-    private ProgressBar progressBar;
-    // 10.0.2.2 is used instead of localhost to run on emulator
-    private static final String URL_CREATE_USER = "http://10.0.2.2/gamefitter/create_user.php"; //"http://192.168.1.82:80/gamefitter/create_user.php";
     private static final String TAG_SUCCESS = "success";
     private static int success = 0;
 
     private FirebaseAuth mAuth;
+    private DatabaseReference dbRef;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,6 +56,7 @@ public class SignupActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         mAuth = FirebaseAuth.getInstance();
+        dbRef = FirebaseDatabase.getInstance().getReference();
 
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,13 +83,14 @@ public class SignupActivity extends AppCompatActivity {
 
         signupButton.setEnabled(false);
 
-        createNewUser((String)emailText.getText().toString(), (String)passwordText.getText().toString());
-        //new CreateNewUser().execute();
-
+        createNewUser(nameText.getText().toString(),
+                emailText.getText().toString(),
+                passwordText.getText().toString());
     }
 
     public void onSignupSuccess() {
         signupButton.setEnabled(true);
+
         setResult(RESULT_OK, null);
         finish();
     }
@@ -100,6 +101,7 @@ public class SignupActivity extends AppCompatActivity {
         signupButton.setEnabled(true);
     }
 
+    // TODO: Change validation of signup fields
     public boolean validate() {
         boolean valid = true;
 
@@ -131,7 +133,9 @@ public class SignupActivity extends AppCompatActivity {
         return valid;
     }
 
-    public void createNewUser(String email, String password) {
+    public void createNewUser(final String username, String email, String password) {
+
+        progressBar.setVisibility(View.VISIBLE);
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -141,6 +145,12 @@ public class SignupActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+                            if (user != null) {
+                                UserData userData = new UserData(
+                                        username, user.getEmail());
+                                dbRef.child("users").child(user.getUid()).setValue(userData);
+                            }
+
                             onSignupSuccess();
                         } else {
                             // If sign in fails, display a message to the user.
@@ -149,63 +159,9 @@ public class SignupActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT).show();
                             onSignupFailed();
                         }
+
+                        progressBar.setVisibility(View.INVISIBLE);
                     }
                 });
     }
-    /*
-    static class CreateNewUser extends AsyncTask<String, String, String> {
-        //RelativeLayout layout = new RelativeLayout(SignupActivity.this);
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // TODO: Create progress bar
-
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-
-            progressBar = new ProgressBar(SignupActivity.this,null,android.R.attr.progressBarStyleLarge);
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100,100);
-            params.addRule(RelativeLayout.CENTER_IN_PARENT);
-            layout.addView(progressBar,params);
-            progressBar.setVisibility(View.VISIBLE);
-
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            // TODO: Turn off progress bar
-            //getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-            //progressBar.setVisibility(View.GONE);
-
-            if (success == 1) {
-                onSignupSuccess();
-            } else {
-                onSignupFailed();
-            }
-        }
-
-        @Override
-        protected String doInBackground(String... strings) {
-            String name = nameText.getText().toString();
-            String email = emailText.getText().toString();
-            String password = passwordText.getText().toString();
-
-            HashMap<String, String> params = new HashMap<>();
-            params.put("username", name);
-            params.put("email", email);
-            params.put("password", password);
-
-            try {
-                JSONObject json = jsonParser.makeHttpRequest(URL_CREATE_USER , "POST", params);
-
-                Log.d("Create Response", json.toString());
-
-                success = json.getInt(TAG_SUCCESS);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-    }*/
 }
