@@ -2,11 +2,13 @@ package com.test.gunnzo.gamefit;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
@@ -22,6 +24,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.test.gunnzo.gamefit.dataclasses.GameData;
 import com.test.gunnzo.gamefit.dataclasses.UserData;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,8 +37,8 @@ import butterknife.ButterKnife;
  * Created by Gunnar on 16.2.2018.
  */
 
-public class MainActivity extends FragmentActivity
-        implements OnNewGameRequest, CreateGameDialog.OnCreateGame {
+public class MainActivity extends AppCompatActivity
+        implements OnNewGameRequest, CreateGameDialog.OnCreateGame, JoinGameDialog.OnJoinGame {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     @BindView(R.id.main_fragment_container) View fragmentContainer;
@@ -48,10 +52,12 @@ public class MainActivity extends FragmentActivity
     private FirebaseAuth mAuth;
     private DatabaseReference dbRef;
 
+    private GamesFragment mGamesFragment;
     private OnGamesUpdate updateGameCallback;
 
-    public UserData userData = new UserData();
-    public ArrayList<GameData> mGamesdata = null;
+    public UserData mUserData;// = new UserData();
+    public GameData gameData = new GameData();
+    public ArrayList<GameData> mGamesData = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,52 +89,46 @@ public class MainActivity extends FragmentActivity
         initiateUI(currentUser);
     }
 
+    public void setActionBarTitle(String title) {
+        getSupportActionBar().setTitle(title);
+    }
+
     public void initiateUI(final FirebaseUser currentUser) {
         if (currentUser == null) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivityForResult(intent, USER_INFO_REQUEST);
         } else {
+
             dbRef.child("users").child(currentUser.getUid())
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
 
                     UserData userData = dataSnapshot.getValue(UserData.class);
-
+                    updateUserData(userData);
+/*
                     if (userData.getGamesIds() != null) {
-                        // TODO: Start NewGameFragment with the data that it needs
-                        //Log.i(TAG, "User is not part of any games");
-                        final ArrayList<GameData> tempGamesData = null;
+                        runGamesFragment();
+
                         for (DataSnapshot gameId : dataSnapshot.child("gamesIds").getChildren()) {
-                            Log.i(TAG,gameId.getKey());
-                            DatabaseReference dbGamesRef = dbRef.child("games").child(gameId.getKey());
+                            DatabaseReference dbGamesRef =
+                                    dbRef.child("games").child(gameId.getKey());
 
                             dbGamesRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
-                                    Log.i(TAG, "Hér er ég");
-                                    tempGamesData.add(dataSnapshot.getValue(GameData.class));
-                                    // TODO: Make the getting every relevant game work
-                                    /*
-                                    if (gameData != null) {
-                                        mGamesdata.add(gameData);
-                                    }*/
+                                    addToGamesData(dataSnapshot.getValue(GameData.class));
+
+                                    updateGamesFragment();
                                 }
 
                                 @Override
                                 public void onCancelled(DatabaseError databaseError) {
-                                    Log.w(TAG, "Failed to read games data", databaseError.toException());
+                                    Log.w(TAG, "Failed to read games data",
+                                            databaseError.toException());
                                 }
                             });
                         }
-                        if (mGamesdata != null) {
-                            updateGamesFragment(userData, tempGamesData);
-                        }
-                    } /*else {
-                        // TODO: Start GamesFragment with the data that it needs
-
-
-                        //Log.i(TAG, "Some games");
                     }*/
                 }
 
@@ -143,11 +143,14 @@ public class MainActivity extends FragmentActivity
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     // TODO: Handle cases if username is changed
+                    if (mUserData != null) {
+                        updateUserName((String)dataSnapshot.getValue());
+                    }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Log.w(TAG, "Failed to read user data", databaseError.toException());
+                    Log.w(TAG, "Failed to read username", databaseError.toException());
                 }
             });
 
@@ -156,7 +159,28 @@ public class MainActivity extends FragmentActivity
                 // TODO: Handle cases if a game assigned to user is added/changed/removed
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    //Log.i(TAG,"Child added: " + s);
+                    if (s == null) {
+                        Log.i(TAG,"First child");
+                        runGamesFragment();
+                    }
+                    DatabaseReference dbGamesRef =
+                            dbRef.child("games").child(dataSnapshot.getKey());
 
+                    dbGamesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            addToGamesData(dataSnapshot.getValue(GameData.class));
+
+                            updateGamesFragment();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.w(TAG, "Failed to read games data",
+                                    databaseError.toException());
+                        }
+                    });
                 }
 
                 @Override
@@ -176,22 +200,44 @@ public class MainActivity extends FragmentActivity
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                    Log.w(TAG, "Failed to read games id's", databaseError.toException());
                 }
             });
         }
     }
 
-    private void updateGamesFragment(UserData ud, ArrayList<GameData> gamesData) {
-        this.userData = ud;
-        //Log.i(TAG, userData.getEmail());
+    private void updateUserName(String username) {
+        mUserData.setUsername(username);
+    }
 
-        GamesFragment gamesFragment = new GamesFragment();
+    private void updateUserData(UserData userData) {
+        mUserData = userData;
+    }
+
+    private void runNewGameFragment() {
+        NewGameFragment newGameFragment = new NewGameFragment();
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_fragment_container, newGameFragment).commit();
+    }
+
+    private void addToGamesData(GameData gameData) {
+        mGamesData.add(gameData);
+    }
+
+    private void runGamesFragment() {
+        mGamesFragment = new GamesFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.main_fragment_container, gamesFragment);
+        transaction.replace(R.id.main_fragment_container, mGamesFragment);
         transaction.commit();
 
-        updateGameCallback.updateGameRecyclerView(mGamesdata);
+        updateGameCallback = mGamesFragment;
+    }
+
+    private void updateGamesFragment() {
+        if (mGamesData.size() > 0) {
+            updateGameCallback.updateGameRecyclerView(mGamesData);
+        }
     }
 
     public interface OnGamesUpdate {
@@ -201,6 +247,7 @@ public class MainActivity extends FragmentActivity
     @Override
     public void onOptionSelected(int optionId) {
         if (optionId == CREATE_NEW_GAME_ID) {
+
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             Fragment prev = getSupportFragmentManager().findFragmentByTag(DIALOG_FRAG_TAG);
             if (prev != null) {
@@ -211,7 +258,15 @@ public class MainActivity extends FragmentActivity
             DialogFragment createGameFragment = new CreateGameDialog();
             createGameFragment.show(ft, DIALOG_FRAG_TAG);
         } else if (optionId == JOIN_NEW_GAME_ID) {
-            // TODO: Start join new game dialog
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            Fragment prev = getSupportFragmentManager().findFragmentByTag(DIALOG_FRAG_TAG);
+            if (prev != null) {
+                ft.remove(prev);
+            }
+            ft.addToBackStack(null);
+
+            DialogFragment joinGameFragment = new JoinGameDialog();
+            joinGameFragment.show(ft, DIALOG_FRAG_TAG);
         }
     }
 
@@ -237,5 +292,33 @@ public class MainActivity extends FragmentActivity
             Log.w(TAG, e);
         }
 
+    }
+
+    @Override
+    public void joinGame(final String gameId) {
+        // TODO: Let user now if id is incorrect
+        try {
+            DatabaseReference gamesRef = dbRef.child("games");
+            gamesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.child(gameId).exists()) {
+                        DatabaseReference usersRef = dbRef.child("users");
+
+                        Map<String, Object> gamesIdsUpdate = new HashMap<>();
+                        gamesIdsUpdate.put(dataSnapshot.getKey(), true);
+                        usersRef.child(mAuth.getUid())
+                                .child("gamesIds").updateChildren(gamesIdsUpdate);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        } catch (DatabaseException e) {
+            Log.w(TAG, e);
+        }
     }
 }

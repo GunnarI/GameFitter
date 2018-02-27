@@ -29,6 +29,11 @@
     <string name="create_game_cancel">Cancel</string>
     <string name="create_game_finish">Create</string>
 
+    <!-- Joining new game dialog -->
+    <string name="join_game_title">Join Game</string>
+    <string name="join_game_id">Game Id (shared from someone)</string>
+    <string name="join_game_finish">Join!</string>
+
     <!-- Fragment interaction error message -->
     <string name="frag_listener_exception">must implement OnFragmentInteractionListener</string>
 
