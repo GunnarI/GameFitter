@@ -67,26 +67,25 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
 
         if (fragmentContainer != null) {
-            if (savedInstanceState != null) {
-                return;
+            if (savedInstanceState == null) {
+                NewGameFragment newGameFragment = new NewGameFragment();
+
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.main_fragment_container, newGameFragment).commit();
             }
-
-            NewGameFragment newGameFragment = new NewGameFragment();
-
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.main_fragment_container, newGameFragment).commit();
         }
 
         mAuth = FirebaseAuth.getInstance();
         dbRef = FirebaseDatabase.getInstance().getReference();
+
+        // TODO: Check if these changes work. This was in onStart before but put here to prevent duplication in GamesFragment
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        initiateUI(currentUser);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        initiateUI(currentUser);
     }
 
     public void setActionBarTitle(String title) {
