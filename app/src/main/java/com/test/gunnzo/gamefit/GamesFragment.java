@@ -110,7 +110,7 @@ public class GamesFragment extends Fragment
     }
 
     @Override
-    public void updateGameRecyclerView(ArrayList<GameData> gamesData) {
+    public void updateGameRecyclerView(ArrayList<GameDataList> gamesData) {
         mAdapter.setGameData(gamesData);
     }
 

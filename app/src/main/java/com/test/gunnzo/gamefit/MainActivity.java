@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.test.gunnzo.gamefit.adapters.GamesAdapter;
 import com.test.gunnzo.gamefit.dataclasses.GameData;
 import com.test.gunnzo.gamefit.dataclasses.UserData;
 
@@ -34,11 +35,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by Gunnar on 16.2.2018.
+ * Used to identify how a user wants to create a new game
+ * @author Gunnar
+ * @version %G% 16.2.2018.
  */
 
 public class MainActivity extends AppCompatActivity
-        implements OnNewGameRequest, CreateGameDialog.OnCreateGame, JoinGameDialog.OnJoinGame {
+        implements OnNewGameRequest, CreateGameDialog.OnCreateGame, JoinGameDialog.OnJoinGame,
+            GamesAdapter.OnLeaveGame {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     @BindView(R.id.main_fragment_container) View fragmentContainer;
@@ -59,6 +63,8 @@ public class MainActivity extends AppCompatActivity
     public GameData gameData = new GameData();
     public ArrayList<GameData> mGamesData = new ArrayList<>();
 
+    public ArrayList<GameDataList> mGameDataList = new ArrayList<>();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +72,8 @@ public class MainActivity extends AppCompatActivity
 
         ButterKnife.bind(this);
 
+        // If no fragment has been committed to the activity's ViewGroup then the NewGameFragment is
+        // committed.
         if (fragmentContainer != null) {
             if (savedInstanceState == null) {
                 NewGameFragment newGameFragment = new NewGameFragment();
@@ -78,7 +86,6 @@ public class MainActivity extends AppCompatActivity
         mAuth = FirebaseAuth.getInstance();
         dbRef = FirebaseDatabase.getInstance().getReference();
 
-        // TODO: Check if these changes work. This was in onStart before but put here to prevent duplication in GamesFragment
         FirebaseUser currentUser = mAuth.getCurrentUser();
         initiateUI(currentUser);
     }
@@ -88,10 +95,26 @@ public class MainActivity extends AppCompatActivity
         super.onStart();
     }
 
+
     public void setActionBarTitle(String title) {
         getSupportActionBar().setTitle(title);
     }
 
+    /**
+     * Initiates the user-interface depending on if the user is logged in or not. If not logged in
+     * then LoginActivity is initiated, otherwise the users profile information is fetched from
+     * database to initiate welcome screen.
+     *
+     * <p>The method also adds listeners on the database so that if profile info changes in the
+     * database then the {@link UserData} instance is updated as well.</p>
+     * @param currentUser a FirebaseUser class instance containing helper methods to change or
+     *                    retrieve profile information
+     * @see <a href="https://developers.google.com/android/reference/com/google/firebase/auth/FirebaseUser">FirebaseUser</a>
+     * @see #updateUserData(UserData)
+     * @see #updateUserName(String)
+     * @see #runGamesFragment()
+     * @see #updateGamesFragment()
+     */
     public void initiateUI(final FirebaseUser currentUser) {
         if (currentUser == null) {
             Intent intent = new Intent(this, LoginActivity.class);
@@ -105,30 +128,6 @@ public class MainActivity extends AppCompatActivity
 
                     UserData userData = dataSnapshot.getValue(UserData.class);
                     updateUserData(userData);
-/*
-                    if (userData.getGamesIds() != null) {
-                        runGamesFragment();
-
-                        for (DataSnapshot gameId : dataSnapshot.child("gamesIds").getChildren()) {
-                            DatabaseReference dbGamesRef =
-                                    dbRef.child("games").child(gameId.getKey());
-
-                            dbGamesRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    addToGamesData(dataSnapshot.getValue(GameData.class));
-
-                                    updateGamesFragment();
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                    Log.w(TAG, "Failed to read games data",
-                                            databaseError.toException());
-                                }
-                            });
-                        }
-                    }*/
                 }
 
                 @Override
@@ -158,7 +157,6 @@ public class MainActivity extends AppCompatActivity
                 // TODO: Handle cases if a game assigned to user is added/changed/removed
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    //Log.i(TAG,"Child added: " + s);
                     if (s == null) {
                         Log.i(TAG,"First child");
                         runGamesFragment();
@@ -169,7 +167,8 @@ public class MainActivity extends AppCompatActivity
                     dbGamesRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            addToGamesData(dataSnapshot.getValue(GameData.class));
+                            addToGamesData(dataSnapshot.getValue(GameData.class),
+                                    dataSnapshot.getKey());
 
                             updateGamesFragment();
                         }
@@ -189,7 +188,11 @@ public class MainActivity extends AppCompatActivity
 
                 @Override
                 public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    String gameId = dataSnapshot.getKey();
 
+                    removeFromGamesData(gameId);
+
+                    updateGamesFragment();
                 }
 
                 @Override
@@ -205,10 +208,19 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Updates the username param for the {@link UserData} instance.
+     * @param username a string with the username of the user logged in
+     */
     private void updateUserName(String username) {
         mUserData.setUsername(username);
     }
 
+    /**
+     * Updates the {@link UserData} instance with new instance/updated data, typically retrieved
+     * from database.
+     * @param userData contains the new instance of {@link UserData}
+     */
     private void updateUserData(UserData userData) {
         mUserData = userData;
     }
@@ -220,8 +232,24 @@ public class MainActivity extends AppCompatActivity
                 .replace(R.id.main_fragment_container, newGameFragment).commit();
     }
 
-    private void addToGamesData(GameData gameData) {
+    /**
+     * Adds an new instance of {@link GameData} to the arraylist {@code mGameData}.
+     * @param gameData an instance of {@link GameData}
+     */
+    private void addToGamesData(GameData gameData, String gameId) {
+        mGameDataList.add(new GameDataList(gameData.getGameName(), gameData.getGameType(), gameId));
         mGamesData.add(gameData);
+    }
+
+    private void removeFromGamesData(String gameId) {
+        mUserData.getGamesIds().remove(gameId);
+        for (int i=0; i<mGameDataList.size(); i++) {
+            if (mGameDataList.get(i).getGameId().equals(gameId)) {
+                mGameDataList.remove(i);
+                mGamesData.remove(i);
+                return;
+            }
+        }
     }
 
     private void runGamesFragment() {
@@ -233,14 +261,18 @@ public class MainActivity extends AppCompatActivity
         updateGameCallback = mGamesFragment;
     }
 
+    /**
+     * Uses {@code updateGameRecyclerView} method from {@link OnGamesUpdate} interface to update
+     * {@link GamesFragment} with new instance of {@link GameData}.
+     */
     private void updateGamesFragment() {
-        if (mGamesData.size() > 0) {
-            updateGameCallback.updateGameRecyclerView(mGamesData);
+        if (mGameDataList.size() > 0) {
+            updateGameCallback.updateGameRecyclerView(mGameDataList);
         }
     }
 
     public interface OnGamesUpdate {
-        void updateGameRecyclerView(ArrayList<GameData> gamesData);
+        void updateGameRecyclerView(ArrayList<GameDataList> gamesData);
     }
 
     @Override
@@ -316,6 +348,27 @@ public class MainActivity extends AppCompatActivity
 
                 }
             });
+        } catch (DatabaseException e) {
+            Log.w(TAG, e);
+        }
+    }
+
+    @Override
+    public void leaveGame(String gameId) {
+        try {
+            DatabaseReference gamesRef = dbRef.child("games");
+            DatabaseReference usersRef = dbRef.child("users");
+
+            //String gameId = (String) mUserData.getGamesIds().get(gamePos);
+            //Log.i(TAG, gameId);
+
+            usersRef.child(mAuth.getUid())
+                    .child("gamesIds")
+                    .child(gameId)
+                    .removeValue();
+            gamesRef.child(gameId).child("userIds").child(mAuth.getUid()).removeValue();
+
+
         } catch (DatabaseException e) {
             Log.w(TAG, e);
         }

@@ -34,6 +34,11 @@
     <string name="join_game_id">Game Id (shared from someone)</string>
     <string name="join_game_finish">Join!</string>
 
+    <!-- Leave game dialog -->
+    <string name="leave_game_title">Leave Game</string>
+    <string name="leave_game_cancel">Cancel</string>
+    <string name="leave_game_ok">OK</string>
+
     <!-- Fragment interaction error message -->
     <string name="frag_listener_exception">must implement OnFragmentInteractionListener</string>
 
