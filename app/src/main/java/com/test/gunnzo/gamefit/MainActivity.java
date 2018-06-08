@@ -2,11 +2,9 @@ package com.test.gunnzo.gamefit;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -24,8 +22,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.test.gunnzo.gamefit.adapters.GamesAdapter;
 import com.test.gunnzo.gamefit.dataclasses.GameData;
 import com.test.gunnzo.gamefit.dataclasses.UserData;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;

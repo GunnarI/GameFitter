@@ -32,7 +32,7 @@ import butterknife.BindView;
  * Created by Gunnar on 6.2.2018.
  */
 
-public class SignupActivity extends AppCompatActivity {
+public class SignupActivity extends AppCompatActivity implements SignupFrame {
     private static final String TAG = "SignupActivity";
 
     @BindView(R.id.input_name) EditText nameText;
@@ -61,7 +61,9 @@ public class SignupActivity extends AppCompatActivity {
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                signup();
+                signup(nameText.getText().toString(),
+                        emailText.getText().toString(),
+                        passwordText.getText().toString());
             }
         });
 
@@ -73,21 +75,21 @@ public class SignupActivity extends AppCompatActivity {
         });
     }
 
-    public void signup() {
+    @Override
+    public void signup(String name, String email, String password) {
         Log.d(TAG, "Signup");
 
-        if (!validate()) {
+        if (!validate(name, email, password)) {
             onSignupFailed();
             return;
         }
 
         signupButton.setEnabled(false);
 
-        createNewUser(nameText.getText().toString(),
-                emailText.getText().toString(),
-                passwordText.getText().toString());
+        createNewUser(name, email, password);
     }
 
+    @Override
     public void onSignupSuccess() {
         signupButton.setEnabled(true);
 
@@ -95,6 +97,7 @@ public class SignupActivity extends AppCompatActivity {
         finish();
     }
 
+    @Override
     public void onSignupFailed() {
         //Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
 
@@ -102,12 +105,9 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     // TODO: Change validation of signup fields
-    public boolean validate() {
+    @Override
+    public boolean validate(String name, String email, String password) {
         boolean valid = true;
-
-        String name = nameText.getText().toString();
-        String email = emailText.getText().toString();
-        String password = passwordText.getText().toString();
 
         InputValidations v = new InputValidations();
 

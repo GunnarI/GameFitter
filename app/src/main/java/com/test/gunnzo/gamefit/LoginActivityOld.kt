@@ -17,13 +17,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.android.gms.common.api.ApiException
-import java.util.*
 
 
 /**
  * Created by Gunnar on 4.2.2018.
  */
-class LoginActivity : AppCompatActivity() {
+class LoginActivityOld : AppCompatActivity() {
     private val TAG = "LoginActivity"
     private val REQUEST_SIGNUP = 0;
 
@@ -176,7 +175,7 @@ class LoginActivity : AppCompatActivity() {
                         onLoginSuccess()
                     } else {
                         Log.w(TAG, "signInWithEmail:failure", task.exception)
-                        Toast.makeText(this@LoginActivity, "Authentication failed.",
+                        Toast.makeText(this@LoginActivityOld, "Authentication failed.",
                                 Toast.LENGTH_SHORT).show()
 
                         input_email.setError("Incorrect email and/or password");
