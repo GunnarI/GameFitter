@@ -21,10 +21,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.test.gunnzo.gamefit.backend.JSONParser;
 import com.test.gunnzo.gamefit.dataclasses.UserData;
 
-import org.json.JSONObject;
-
-import java.util.HashMap;
-
 import butterknife.ButterKnife;
 import butterknife.BindView;
 
@@ -32,7 +28,7 @@ import butterknife.BindView;
  * Created by Gunnar on 6.2.2018.
  */
 
-public class SignupActivity extends AppCompatActivity implements SignupFrame {
+public class SignupActivity extends AppCompatActivity implements SignupView {
     private static final String TAG = "SignupActivity";
 
     @BindView(R.id.input_name) EditText nameText;
@@ -48,6 +44,8 @@ public class SignupActivity extends AppCompatActivity implements SignupFrame {
 
     private FirebaseAuth mAuth;
     private DatabaseReference dbRef;
+
+    private SignupPresenter presenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -73,23 +71,25 @@ public class SignupActivity extends AppCompatActivity implements SignupFrame {
                 finish();
             }
         });
+
+        presenter = new SignupPresenter(this,
+                new SignupInteractorImpl(mAuth, dbRef, this));
     }
 
-    @Override
     public void signup(String name, String email, String password) {
         Log.d(TAG, "Signup");
 
-        if (!validate(name, email, password)) {
-            onSignupFailed();
+        if (!presenter.validate(name, email, password)) {
+            presenter.onSignupFailed();
             return;
         }
 
-        signupButton.setEnabled(false);
+        presenter.onCreatingUser(name, email, password);
 
-        createNewUser(name, email, password);
+        //createNewUser(name, email, password);
     }
 
-    @Override
+    /*
     public void onSignupSuccess() {
         signupButton.setEnabled(true);
 
@@ -97,15 +97,14 @@ public class SignupActivity extends AppCompatActivity implements SignupFrame {
         finish();
     }
 
-    @Override
     public void onSignupFailed() {
         //Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
 
         signupButton.setEnabled(true);
-    }
+    }*/
 
+    /*
     // TODO: Change validation of signup fields
-    @Override
     public boolean validate(String name, String email, String password) {
         boolean valid = true;
 
@@ -115,7 +114,7 @@ public class SignupActivity extends AppCompatActivity implements SignupFrame {
             nameText.setError("enter a username, up to 16 characters");
             valid = false;
         } else {
-            emailText.setError(null);
+            nameText.setError(null);
         }
 
         if (!v.isValidEmail(email)) {
@@ -133,11 +132,9 @@ public class SignupActivity extends AppCompatActivity implements SignupFrame {
         }
 
         return valid;
-    }
-
+    }*/
+/*
     public void createNewUser(final String username, String email, String password) {
-
-        progressBar.setVisibility(View.VISIBLE);
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -153,17 +150,62 @@ public class SignupActivity extends AppCompatActivity implements SignupFrame {
                                 dbRef.child("users").child(user.getUid()).setValue(userData);
                             }
 
-                            onSignupSuccess();
+                            presenter.onSignupSuccess();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(SignupActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                            onSignupFailed();
+                            presenter.onSignupFailed();
                         }
 
-                        progressBar.setVisibility(View.INVISIBLE);
+                        presenter.finishedCreatingUser();
                     }
                 });
+    }*/
+
+    @Override
+    public void showProgress() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void hideProgress() {
+        progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void enableButton() {
+        signupButton.setEnabled(true);
+    }
+
+    @Override
+    public void disableButton() {
+        signupButton.setEnabled(false);
+    }
+
+    @Override
+    public void setUsernameError(String message) {
+        nameText.setError(message);
+    }
+
+    @Override
+    public void setEmailError(String message) {
+        emailText.setError(message);
+    }
+
+    @Override
+    public void setPasswordError(String message) {
+        passwordText.setError(message);
+    }
+
+    @Override
+    public void showToast(String message) {
+        Toast.makeText(SignupActivity.this, message,
+                Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void navigateToHome() {
+        setResult(RESULT_OK, null);
+        finish();
     }
 }
