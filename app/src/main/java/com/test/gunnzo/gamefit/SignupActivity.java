@@ -90,20 +90,6 @@ public class SignupActivity extends AppCompatActivity implements SignupView {
     }
 
     /*
-    public void onSignupSuccess() {
-        signupButton.setEnabled(true);
-
-        setResult(RESULT_OK, null);
-        finish();
-    }
-
-    public void onSignupFailed() {
-        //Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
-
-        signupButton.setEnabled(true);
-    }*/
-
-    /*
     // TODO: Change validation of signup fields
     public boolean validate(String name, String email, String password) {
         boolean valid = true;
