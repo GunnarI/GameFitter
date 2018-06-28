@@ -5,6 +5,6 @@
     android:id="@+id/main_fragment_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.test.gunnzo.gamefit.MainActivity">
+    tools:context="com.appelicious.gunnzo.gamefit.MainActivity">
 
 </FrameLayout>
