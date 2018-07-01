@@ -4,7 +4,9 @@ public interface SignupInteractor {
 
     interface OnSignupFinishedListener {
         void onSignupSuccess();
+
         void onSignupFailed();
+
         void finishedCreatingUser();
     }
 

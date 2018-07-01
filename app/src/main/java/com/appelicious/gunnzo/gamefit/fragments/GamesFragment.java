@@ -1,5 +1,7 @@
 package com.appelicious.gunnzo.gamefit.fragments;
 
+import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,13 +13,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import com.appelicious.gunnzo.gamefit.GameDataList;
 import com.appelicious.gunnzo.gamefit.OnNewGameRequest;
 import com.appelicious.gunnzo.gamefit.R;
 import com.appelicious.gunnzo.gamefit.activities.MainActivity;
 import com.appelicious.gunnzo.gamefit.adapters.GamesAdapter;
-
+import com.appelicious.gunnzo.gamefit.presenters.GamesPresenter;
+import com.appelicious.gunnzo.gamefit.views.GamesView;
 import java.util.ArrayList;
 
 /**
@@ -25,23 +29,23 @@ import java.util.ArrayList;
  */
 
 public class GamesFragment extends Fragment
-        implements MainActivity.OnGamesUpdate {
+        implements MainActivity.OnGamesUpdate, GamesView {
 
-    private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mLayoutManager;
+    @BindView(R.id.games_fragment_recycler_view) RecyclerView mRecyclerView;
+    @BindView(R.id.add_game_float_button) FloatingActionButton addGameButton;
+    @BindView(R.id.create_game_float_button) FloatingActionButton createGameButton;
+    @BindView(R.id.join_game_float_button) FloatingActionButton joinGameButton;
+
+    private GamesPresenter presenter;
     private GamesAdapter mAdapter;
-
     private OnNewGameRequest mCallback;
-
-    private FloatingActionButton createGameButton;
-    private FloatingActionButton joinGameButton;
     private boolean fabOpen;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ((MainActivity) getActivity()).setActionBarTitle("Games");
+        checkNotNull(((MainActivity) getActivity())).setActionBarTitle("Games");
     }
 
     @Override
@@ -52,15 +56,15 @@ public class GamesFragment extends Fragment
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View mView = inflater.inflate(R.layout.fragment_games, container, false);
-        mRecyclerView = (RecyclerView) mView.findViewById(R.id.games_fragment_recycler_view);
+        ButterKnife.bind(this, mView);
 
-        FloatingActionButton addGameButton = mView.findViewById(R.id.add_game_float_button);
-        createGameButton = mView.findViewById(R.id.create_game_float_button);
-        joinGameButton = mView.findViewById(R.id.join_game_float_button);
+        presenter = new GamesPresenter(this);
 
-        mLayoutManager = new LinearLayoutManager(this.getActivity());
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this.getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         mAdapter = new GamesAdapter();
@@ -69,11 +73,7 @@ public class GamesFragment extends Fragment
         addGameButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!fabOpen) {
-                    showFABMenu();
-                } else {
-                    closeFABMenu();
-                }
+                presenter.onFabToggle(fabOpen);
             }
         });
 
@@ -92,20 +92,6 @@ public class GamesFragment extends Fragment
         });
 
         return mView;
-    }
-
-    private void showFABMenu() {
-        fabOpen = true;
-        createGameButton.animate()
-                .translationY(-getResources().getDimension(R.dimen.cg_button_offset));
-        joinGameButton.animate()
-                .translationY(-getResources().getDimension(R.dimen.jg_button_offset));
-    }
-
-    private void closeFABMenu() {
-        fabOpen = false;
-        createGameButton.animate().translationY(0);
-        joinGameButton.animate().translationY(0);
     }
 
     @Override
@@ -127,5 +113,31 @@ public class GamesFragment extends Fragment
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnNewGameRequest");
         }
+    }
+
+    @Override
+    public void showFabMenu() {
+        fabOpen = true;
+        createGameButton.animate()
+                .translationY(-getResources().getDimension(R.dimen.cg_button_offset));
+        joinGameButton.animate()
+                .translationY(-getResources().getDimension(R.dimen.jg_button_offset));
+    }
+
+    @Override
+    public void closeFabMenu() {
+        fabOpen = false;
+        createGameButton.animate().translationY(0);
+        joinGameButton.animate().translationY(0);
+    }
+
+    @Override
+    public void showProgress() {
+        // TODO: Implement progress bar to show when recycler view is being updated
+    }
+
+    @Override
+    public void hideProgress() {
+        // TODO: Implement progress bar to show when recycler view is being updated
     }
 }

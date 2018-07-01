@@ -1,17 +1,16 @@
-package com.appelicious.gunnzo.gamefit;
+package com.appelicious.gunnzo.gamefit.presenters;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.appelicious.gunnzo.gamefit.presenters.SignupInteractor;
+import com.appelicious.gunnzo.gamefit.dataclasses.UserData;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
-import com.appelicious.gunnzo.gamefit.dataclasses.UserData;
 
 public class SignupInteractorImpl implements SignupInteractor {
     private static final String TAG = "SignupInteractor";
@@ -20,6 +19,13 @@ public class SignupInteractorImpl implements SignupInteractor {
     private DatabaseReference dbRef;
     private Activity executor;
 
+    /**
+     * Instantiates a new Signup interactor.
+     *
+     * @param mAuth    the Firebase authentication reference
+     * @param dbRef    the Firebase database reference
+     * @param executor the executor referencing the activity executing the SignupInteractor
+     */
     public SignupInteractorImpl(FirebaseAuth mAuth, DatabaseReference dbRef, Activity executor) {
         this.mAuth = mAuth;
         this.dbRef = dbRef;

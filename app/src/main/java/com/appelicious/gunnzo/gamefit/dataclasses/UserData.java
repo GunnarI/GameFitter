@@ -24,6 +24,8 @@ public class UserData { //implements Parcelable {
     }
 
     /**
+     * Gets username.
+     *
      * @return a string containing the username of the current user
      */
     public String getUsername() {
@@ -31,6 +33,7 @@ public class UserData { //implements Parcelable {
     }
 
     /**
+     * Sets username.
      *
      * @param username username to assign to current user
      */
@@ -39,17 +42,26 @@ public class UserData { //implements Parcelable {
     }
 
     /**
+     * Gets email.
+     *
      * @return a string containing the email of the current user
      */
     public String getEmail() {
         return this.email;
     }
 
+    /**
+     * Sets email.
+     *
+     * @param email the email
+     */
     public void setEmail(String email) {
         this.email = email;
     }
 
     /**
+     * Gets games ids.
+     *
      * @return a String array with all the game id's of the user
      */
     public Map<String, Object> getGamesIds() {
@@ -57,6 +69,8 @@ public class UserData { //implements Parcelable {
     }
 
     /**
+     * Sets games ids.
+     *
      * @param gamesIds String array containing the id's of the games assigned to the user
      */
     public void setGamesIds(Map<String, Object> gamesIds) {
