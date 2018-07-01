@@ -7,8 +7,6 @@ import java.util.Map;
  */
 
 public class GameData {
-
-    //private String gameId;
     private String gameName;
     private String gameType;
     private Map<String, Object> userIds;
@@ -20,15 +18,6 @@ public class GameData {
         this.gameName = gameName;
         this.gameType = gameType;
     }
-
-    /*
-    public String getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(String gameId) {
-        this.gameId = gameId;
-    }*/
 
     public String getGameName() {
         return gameName;

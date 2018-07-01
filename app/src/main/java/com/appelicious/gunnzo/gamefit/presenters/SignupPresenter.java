@@ -16,7 +16,6 @@ public class SignupPresenter implements SignupInteractor.OnSignupFinishedListene
     @Override
     public void onSignupSuccess() {
         signupView.enableButton();
-
         signupView.navigateToHome();
     }
 
@@ -33,6 +32,14 @@ public class SignupPresenter implements SignupInteractor.OnSignupFinishedListene
         signupView.hideProgress();
     }
 
+
+    /**
+     * On creating user.
+     *
+     * @param name     the name
+     * @param email    the email
+     * @param password the password
+     */
     public void onCreatingUser(String name, String email, String password) {
         signupView.disableButton();
 
@@ -41,6 +48,14 @@ public class SignupPresenter implements SignupInteractor.OnSignupFinishedListene
         signupInteractor.createNewUser(name, email, password, this);
     }
 
+    /**
+     * Validate boolean.
+     *
+     * @param name     the name
+     * @param email    the email
+     * @param password the password
+     * @return the boolean
+     */
     public boolean validate(String name, String email, String password) {
         boolean valid = true;
 

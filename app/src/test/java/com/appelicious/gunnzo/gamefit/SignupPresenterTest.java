@@ -16,13 +16,13 @@ import static org.junit.Assert.*;
 @RunWith(MockitoJUnitRunner.class)
 public class SignupPresenterTest {
 
-    SignupPresenter presenter;
+    private SignupPresenter presenter;
 
     @Mock
-    SignupView view;
+    private SignupView view;
 
     @Mock
-    SignupInteractor interactor;
+    private SignupInteractor interactor;
 
 
     @Before

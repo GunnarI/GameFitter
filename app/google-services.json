@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:977777569614:android:d84364f73d0ee4b7",
         "android_client_info": {
-          "package_name": "com.test.gunnzo.gamefit"
+          "package_name": "com.appelicious.gunnzo.gamefit"
         }
       },
       "oauth_client": [
@@ -18,7 +18,7 @@
           "client_id": "977777569614-tn4739k7beet1q40bo4un1kbh8cdjj44.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.test.gunnzo.gamefit",
+            "package_name": "com.appelicious.gunnzo.gamefit",
             "certificate_hash": "e39a2f947f7d4c34461c68c77692f19ae31ba436"
           }
         },
