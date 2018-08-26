@@ -26,7 +26,7 @@ public class GamesAdapter extends RecyclerView.Adapter<GamesAdapter.ViewHolder> 
     private ArrayList<GameDataList> mGameData;
     private OnLeaveGame mCallback;
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView gameName;
         final ImageView gameType;
         ViewHolder(View view) {

@@ -42,5 +42,9 @@
     <!-- Fragment interaction error message -->
     <string name="frag_listener_exception">must implement OnFragmentInteractionListener</string>
 
+    <!-- Select player dialog -->
+    <string name="select_player_title">Select Player</string>
+    <string name="select_player_button">Select</string>
+
     <string name="web_client_id">977777569614-f6qbsej2l01urcv3a8ksqjusng7e8vbd.apps.googleusercontent.com</string>
 </resources>
