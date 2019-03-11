@@ -1,12 +1,12 @@
 package com.appelicious.gunnzo.gamefit;
 
-public class GameDataList {
+public class GameDataListItem {
 
     private String gameName;
     private String gameType;
     private String gameId;
 
-    public GameDataList(String gameName, String gameType, String gameId) {
+    public GameDataListItem(String gameName, String gameType, String gameId) {
         this.gameName = gameName;
         this.gameType = gameType;
         this.gameId = gameId;

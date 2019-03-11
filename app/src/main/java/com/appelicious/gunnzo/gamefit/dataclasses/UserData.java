@@ -1,6 +1,7 @@
 package com.appelicious.gunnzo.gamefit.dataclasses;
 
 import java.util.Map;
+import java.util.Observable;
 
 /**
  * Class containing the user information retrieved from database for the user logged in.
@@ -9,7 +10,7 @@ import java.util.Map;
  * @version 1.0, 18.2.2018
  */
 
-public class UserData { //implements Parcelable {
+public class UserData extends Observable { //implements Parcelable {
 
     private String username;
     private String email;

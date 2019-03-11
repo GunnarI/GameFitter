@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- 500 - 700 - 900 - A200 -->
-    <color name="colorPrimary">#607D8B</color>
-    <color name="colorPrimaryDark">#455A64</color>
+    <color name="colorPrimary">#546E7A</color>
+    <color name="colorPrimaryDark">#37474F</color>
     <color name="colorPrimaryDarker">#263238</color>
-    <color name="colorAccent">#FF6E40</color>
+    <color name="colorAccent">#FF1744</color>
 
     <color name="black">#000000</color>
     <color name="jet">#222222</color>

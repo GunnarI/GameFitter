@@ -2,7 +2,6 @@ package com.appelicious.gunnzo.gamefit.adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.appelicious.gunnzo.gamefit.GameDataList;
+import com.appelicious.gunnzo.gamefit.GameDataListItem;
 import com.appelicious.gunnzo.gamefit.R;
 
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ import java.util.ArrayList;
 public class GamesAdapter extends RecyclerView.Adapter<GamesAdapter.ViewHolder> {
     private static final String TAG = GamesAdapter.class.getSimpleName();
 
-    private ArrayList<GameDataList> mGameData;
+    private ArrayList<GameDataListItem> mGameData;
     private OnLeaveGame mCallback;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -56,31 +55,20 @@ public class GamesAdapter extends RecyclerView.Adapter<GamesAdapter.ViewHolder> 
         // TODO: Check the sport type and set the image according to that
         holder.gameType.setImageResource(R.mipmap.ic_basketball);
 
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(final View view) {
-                final int gameItemClicked = holder.getAdapterPosition();
+        holder.itemView.setOnLongClickListener((View view) -> {
+            final int gameItemClicked = holder.getAdapterPosition();
 
-                AlertDialog.Builder deleteAlert = new AlertDialog.Builder(view.getContext());
-                deleteAlert.setTitle("Leave Group");
-                deleteAlert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        mCallback.leaveGame(mGameData.get(gameItemClicked).getGameId());
-                        dialogInterface.dismiss();
-                    }
-                });
-                deleteAlert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
+            AlertDialog.Builder deleteAlert = new AlertDialog.Builder(view.getContext());
+            deleteAlert.setTitle("Leave Group");
+            deleteAlert.setPositiveButton("OK", (dialog, which) -> {
+                mCallback.leaveGame(mGameData.get(gameItemClicked).getGameId());
+                dialog.dismiss();
+            });
+            deleteAlert.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
-                deleteAlert.show();
+            deleteAlert.show();
 
-                return true;
-            }
+            return true;
         });
     }
 
@@ -92,7 +80,7 @@ public class GamesAdapter extends RecyclerView.Adapter<GamesAdapter.ViewHolder> 
         return mGameData.size();
     }
 
-    public void setGameData(ArrayList<GameDataList> gameDatas) {
+    public void setGameData(ArrayList<GameDataListItem> gameDatas) {
         mGameData = new ArrayList<>(gameDatas);
         notifyDataSetChanged();
     }

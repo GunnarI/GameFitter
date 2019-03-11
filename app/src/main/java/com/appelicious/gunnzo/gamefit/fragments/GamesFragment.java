@@ -15,7 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import com.appelicious.gunnzo.gamefit.GameDataList;
+import com.appelicious.gunnzo.gamefit.GameDataListItem;
 import com.appelicious.gunnzo.gamefit.OnNewGameRequest;
 import com.appelicious.gunnzo.gamefit.R;
 import com.appelicious.gunnzo.gamefit.activities.MainActivity;
@@ -100,7 +100,7 @@ public class GamesFragment extends Fragment
     }
 
     @Override
-    public void updateGameRecyclerView(ArrayList<GameDataList> gamesData) {
+    public void updateGameRecyclerView(ArrayList<GameDataListItem> gamesData) {
         mAdapter.setGameData(gamesData);
     }
 
